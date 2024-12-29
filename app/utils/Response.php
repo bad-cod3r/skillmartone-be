@@ -4,7 +4,7 @@ function sendResponse($success = true, $code = 200, $message = '', $page_data = 
         'meta' => [
             'success' => $success,
             'code' => $code,
-            'message' => $message
+            'message' => $message,
         ],
         'data' => [
             'page_data' => $page_data ?? new stdClass(),
@@ -12,7 +12,6 @@ function sendResponse($success = true, $code = 200, $message = '', $page_data = 
         ]
     ];
 
-    header('Content-Type: application/json');
     http_response_code($code);
     echo json_encode($response);
     exit;

@@ -71,42 +71,47 @@ function show($db_connect, $id) {
 }
 
 function store($db_connect) {
-    try {
-        $data = json_decode(file_get_contents('php://input'), true);
-        
-        if (!isset($data['name']) || !isset($data['description'])) {
-            sendResponse(
-                success: false,
-                code: 400,
-                message: 'Name and description are required'
-            );
-            return;
-        }
+  try {
+      $raw_data = file_get_contents('php://input');
+      
+      $data = json_decode($raw_data, true);
+      
+      if (!isset($data['name'])) {
+          sendResponse(
+              false, 
+              400, 
+              'Name is required',
+              ['received_data' => $data]
+          );
+          return;
+      }
 
-        $query = "INSERT INTO role (name, description) VALUES (?, ?)";
-        $stmt = mysqli_prepare($db_connect, $query);
-        mysqli_stmt_bind_param($stmt, "ss", $data['name'], $data['description']);
-        
-        if (mysqli_stmt_execute($stmt)) {
-            $role_id = mysqli_insert_id($db_connect);
-            sendResponse(
-                success: true,
-                code: 201,
-                message: 'Role created successfully',
-                page_data: ['id' => $role_id]
-            );
-        } else {
-            throw new Exception(mysqli_error($db_connect));
-        }
-    } catch (Exception $e) {
-        sendResponse(
-            success: false,
-            code: 500,
-            message: 'Failed to create role: ' . $e->getMessage()
-        );
-    }
+      $description = isset($data['description']) ? $data['description'] : null;
+
+      $query = "INSERT INTO role (name, description) VALUES (?, ?)";
+      $stmt = mysqli_prepare($db_connect, $query);
+      mysqli_stmt_bind_param($stmt, "ss", $data['name'], $description);
+      
+      if (mysqli_stmt_execute($stmt)) {
+          $role_id = mysqli_insert_id($db_connect);
+          sendResponse(
+              true, 
+              201, 
+              'Role created successfully', 
+              ['id' => $role_id]
+          );
+      } else {
+          throw new Exception(mysqli_error($db_connect));
+      }
+  } catch (Exception $e) {
+      sendResponse(
+          false, 
+          500, 
+          'Failed to create role: ' . $e->getMessage(),
+          ['error' => $e->getMessage()]
+      );
+  }
 }
-
 function update($db_connect, $id) {
     try {
         $data = json_decode(file_get_contents('php://input'), true);
