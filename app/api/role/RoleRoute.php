@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../controllers/RoleController.php';
+require_once __DIR__ . '/RoleController.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 $action = isset($_GET['action']) ? $_GET['action'] : 'index';
