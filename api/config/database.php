@@ -7,4 +7,6 @@
 
 $db_connect = mysqli_connect( HOST, USER, PASS, DB ) or die ('Unable connect');
 
-header ('content-type: application/json');
+if (!$db_connect) {
+  die("Connection failed: " . mysqli_connect_error());
+}
