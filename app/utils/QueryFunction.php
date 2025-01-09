@@ -1,17 +1,12 @@
 <?php
+require_once __DIR__ . '/Pagination.php';
 
-function findAll($db_connect, $table, $page = 1, $limit = 10) {
+function findAll($db_connect, $table, $params = []) {
     try {
-        $offset = ($page - 1) * $limit;
+        $pagination = pagination($table, $db_connect, $params);
         
-        $count_query = "SELECT COUNT(*) as total FROM $table";
-        $count_result = mysqli_query($db_connect, $count_query);
-        $total_records = mysqli_fetch_assoc($count_result)['total'];
-        $total_pages = ceil($total_records / $limit);
-        
-        $query = "SELECT * FROM $table LIMIT ? OFFSET ?";
-        $stmt = mysqli_prepare($db_connect, $query);
-        mysqli_stmt_bind_param($stmt, "ii", $limit, $offset);
+        $stmt = mysqli_prepare($db_connect, $pagination['query']);
+        mysqli_stmt_bind_param($stmt, "ii", ...$pagination['params']);
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
         
@@ -24,13 +19,8 @@ function findAll($db_connect, $table, $page = 1, $limit = 10) {
             success: true,
             code: 200,
             message: "Success fetch $table data",
-            page_data: $records,
-            page_info: [
-                'current_page' => $page,
-                'total_pages' => $total_pages,
-                'total_records' => $total_records,
-                'records_per_page' => $limit
-            ]
+            data: $records,
+            page_info: $pagination['page_info']
         );
     } catch (Exception $e) {
         sendResponse(
@@ -55,7 +45,7 @@ function findById($db_connect, $table, $id) {
                 success: true,
                 code: 200,
                 message: "Success fetch $table detail",
-                page_data: $record
+                data: $record
             );
         } else {
             sendResponse(
@@ -89,7 +79,6 @@ function create($db_connect, $table, $data) {
                 success: true,
                 code: 201,
                 message: "Data created successfully",
-                page_data: ['id' => $id]
             );
         } else {
             throw new Exception(mysqli_error($db_connect));

@@ -18,8 +18,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 switch ($route) {
-    case 'roles':
+    case 'adminlogin':
+        require_once __DIR__ . '/app/api/auth/admin/AuthRoute.php';
+        break;
+    case 'login':
+        require_once __DIR__ . '/app/api/auth/customer/AuthRoute.php';
+        break;
+    case 'logout':
+        require_once __DIR__ . '/app/api/auth/logout/LogoutRoute.php';
+        break;
+    case 'role':
         require_once __DIR__ . '/app/api/role/RoleRoute.php';
+        break;
+    case 'user':
+        require_once __DIR__ . '/app/api/user/UserRoute.php';
         break;
     default:
         echo json_encode([
