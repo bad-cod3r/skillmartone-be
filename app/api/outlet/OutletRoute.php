@@ -1,5 +1,8 @@
 <?php
 require_once __DIR__ . '/OutletController.php';
+require_once __DIR__ . '/../../middleware/AuthMiddleware.php';
+
+authMiddleware($db_connect);
 
 $method = $_SERVER['REQUEST_METHOD'];
 $action = isset($_GET['action']) ? $_GET['action'] : 'index';
