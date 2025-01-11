@@ -36,6 +36,9 @@ switch ($route) {
     case 'outlet':
         require_once __DIR__ . '/app/api/outlet/OutletRoute.php';
         break;
+    case 'category':
+        require_once __DIR__ . '/app/api/category/CategoryRoute.php';
+        break;
     default:
         echo json_encode([
             'meta' => [
