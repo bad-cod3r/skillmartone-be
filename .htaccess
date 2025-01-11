@@ -1,9 +1,16 @@
-RewriteEngine On
-RewriteBase /skillmartone-be/
+# public/.htaccess
+Options -Indexes
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Allow access to uploads directory
+    RewriteRule ^uploads/ - [L]
+    
+    # Deny access to hidden files
+    RewriteRule (^|/)\. - [F]
+</IfModule>
 
-RewriteCond %{REQUEST_METHOD} OPTIONS
-RewriteRule ^(.*)$ $1 [R=200,L]
-
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^(.*)$ index.php [QSA,L]
+# Mengizinkan akses ke file gambar
+<FilesMatch "\.(jpg|jpeg|png)$">
+    Allow from all
+</FilesMatch>
