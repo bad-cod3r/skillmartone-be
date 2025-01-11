@@ -73,7 +73,7 @@ function createOutlet($db_connect) {
 
     $data['is_active'] = (int)$data['is_active'];
 
-    $upload = uploadImage($_FILES['image'], 'outlet');
+    $upload = uploadImage($_FILES['image'], 'outlets');
         if ($upload['success']) {
             $data['image'] = $upload['path'];
         }
@@ -112,8 +112,8 @@ function updateOutlet($db_connect, $id) {
 
     $data['is_active'] = (int)$data['is_active'];
 
-    if (isset($_FILES['image'])) {
-        $upload = uploadImage($_FILES['image'], 'outlet');
+    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+        $upload = uploadImage($_FILES['image'], 'outlets');
         if ($upload['success']) {
             $data['image'] = $upload['path'];
         }
@@ -123,5 +123,5 @@ function updateOutlet($db_connect, $id) {
 }
 
 function deleteOutlet($db_connect, $id) {
-    destroy($db_connect, 'outlet', $id);
+    destroyWithImage($db_connect, 'outlet', $id, 'outlets');
 }

@@ -175,3 +175,43 @@ function destroy($db_connect, $table, $id) {
         );
     }
 }
+
+function destroyWithImage($db_connect, $table, $id, $directory) {
+    try {
+        $query = "SELECT image FROM $table WHERE id = ?";
+        $stmt = mysqli_prepare($db_connect, $query);
+        mysqli_stmt_bind_param($stmt, "i", $id);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $data = mysqli_fetch_assoc($result);
+
+        if ($data && $data['image']) {
+            $imagePath = __DIR__ . '/../../public' . $data['image'];
+            if (file_exists($imagePath)) {
+                unlink($imagePath);
+            }
+        }
+
+        destroy($db_connect, $table, $id);
+        
+    } catch (Exception $e) {
+        sendResponse(
+            success: false,
+            code: 500,
+            message: "Failed to delete record: " . $e->getMessage()
+        );
+    }
+}
+
+function checkExists($db_connect, $table, $id) {
+    try {
+        $query = "SELECT id FROM $table WHERE id = ? AND is_active = 1";
+        $stmt = mysqli_prepare($db_connect, $query);
+        mysqli_stmt_bind_param($stmt, "i", $id);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        return mysqli_num_rows($result) > 0;
+    } catch (Exception $e) {
+        return false;
+    }
+}
