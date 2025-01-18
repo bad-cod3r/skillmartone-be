@@ -73,10 +73,13 @@ function createOutlet($db_connect) {
 
     $data['is_active'] = (int)$data['is_active'];
 
-    $upload = uploadImage($_FILES['image'], 'outlets');
+    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+        $upload = uploadImage($_FILES['image'], 'outlets');
         if ($upload['success']) {
             $data['image'] = $upload['path'];
         }
+    }
+    
 
     create($db_connect, 'outlet', $data);
 }
