@@ -2,9 +2,8 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type");
+require_once __DIR__ . '/app/config/cors.php';
+setupCORS();
 header("Content-Type: application/json");
 
 require_once __DIR__ . '/app/config/database.php';
@@ -32,6 +31,15 @@ switch ($route) {
         break;
     case 'user':
         require_once __DIR__ . '/app/api/user/UserRoute.php';
+        break;
+    case 'outlet':
+        require_once __DIR__ . '/app/api/outlet/OutletRoute.php';
+        break;
+    case 'category':
+        require_once __DIR__ . '/app/api/category/CategoryRoute.php';
+        break;
+    case 'product':
+        require_once __DIR__ . '/app/api/product/ProductRoute.php';
         break;
     default:
         echo json_encode([

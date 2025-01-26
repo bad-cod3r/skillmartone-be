@@ -1,6 +1,5 @@
 <?php
-
-require_once __DIR__ . '/RoleController.php';
+require_once __DIR__ . '/ProductController.php';
 require_once __DIR__ . '/../../middleware/AuthMiddleware.php';
 
 authMiddleware($db_connect);
@@ -12,31 +11,31 @@ $id = isset($_GET['id']) ? $_GET['id'] : null;
 switch ($method) {
     case 'GET':
         if ($action === 'show' && $id) {
-            getRole($db_connect, $id);
+            getProduct($db_connect, $id);
         } else {
-            getAllRoles($db_connect);
+            getAllProducts($db_connect);
         }
         break;
 
     case 'POST':
-        createRole($db_connect);
-        break;
-
-    case 'PUT':
-        if ($id) {
-            updateRole($db_connect, $id);
+        if ($action === 'update') {
+            if ($id) {
+                updateProduct($db_connect, $id);
+            } else {
+                sendResponse(
+                    success: false,
+                    code: 400,
+                    message: 'ID is required for update'
+                );
+            }
         } else {
-            sendResponse(
-                success: false,
-                code: 400,
-                message: 'ID is required for update'
-            );
+            createProduct($db_connect);
         }
         break;
 
     case 'DELETE':
         if ($id) {
-            deleteRole($db_connect, $id);
+            deleteProduct($db_connect, $id);
         } else {
             sendResponse(
                 success: false,
