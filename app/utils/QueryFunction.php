@@ -1,20 +1,26 @@
 <?php
 require_once __DIR__ . '/Pagination.php';
+require_once __DIR__ . '/GenerateBaseURL.php';
 
 function findAll($db_connect, $table, $params = []) {
     try {
         $pagination = pagination($table, $db_connect, $params);
-        
         $stmt = mysqli_prepare($db_connect, $pagination['query']);
         mysqli_stmt_bind_param($stmt, "ii", ...$pagination['params']);
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
-        
+       
+        $baseUrl = generateBaseUrl();
         $records = [];
         while ($row = mysqli_fetch_assoc($result)) {
+            if (isset($row['image']) && $row['image'] !== '') {
+                $row['image'] = $baseUrl . $row['image'];
+            } else {
+                $row['image'] = NULL;
+            }
             $records[] = $row;
         }
-        
+       
         sendResponse(
             success: true,
             code: 200,
@@ -29,9 +35,9 @@ function findAll($db_connect, $table, $params = []) {
             message: "Failed to fetch $table: " . $e->getMessage()
         );
     }
-}
-
-function findById($db_connect, $table, $id) {
+ }
+ 
+ function findById($db_connect, $table, $id) {
     try {
         $query = "SELECT * FROM $table WHERE id = ?";
         $stmt = mysqli_prepare($db_connect, $query);
@@ -39,8 +45,15 @@ function findById($db_connect, $table, $id) {
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
         $record = mysqli_fetch_assoc($result);
-
+        
         if ($record) {
+            $baseUrl = generateBaseUrl();
+            if (isset($record['image']) && $record['image'] !== '') {
+                $record['image'] = $baseUrl . $record['image'];
+            } else {
+                $record['image'] = NULL;
+            }
+            
             sendResponse(
                 success: true,
                 code: 200,
@@ -61,24 +74,38 @@ function findById($db_connect, $table, $id) {
             message: "Failed to fetch $table: " . $e->getMessage()
         );
     }
-}
+ }
 
 function create($db_connect, $table, $data) {
     try {
         $columns = implode(', ', array_keys($data));
         $values = implode(', ', array_fill(0, count($data), '?'));
         $types = str_repeat('s', count($data));
-        
+       
         $query = "INSERT INTO $table ($columns) VALUES ($values)";
         $stmt = mysqli_prepare($db_connect, $query);
         mysqli_stmt_bind_param($stmt, $types, ...array_values($data));
-        
+       
         if (mysqli_stmt_execute($stmt)) {
             $id = mysqli_insert_id($db_connect);
+            
+            $baseUrl = generateBaseUrl();
+            $selectQuery = "SELECT * FROM $table WHERE id = ?";
+            $selectStmt = mysqli_prepare($db_connect, $selectQuery);
+            mysqli_stmt_bind_param($selectStmt, 'i', $id);
+            mysqli_stmt_execute($selectStmt);
+            $result = mysqli_stmt_get_result($selectStmt);
+            $newRecord = mysqli_fetch_assoc($result);
+            
+            if (isset($newRecord['image'])) {
+                $newRecord['image'] = $baseUrl . $newRecord['image'];
+            }
+ 
             sendResponse(
                 success: true,
                 code: 201,
                 message: "Data created successfully",
+                data: $newRecord
             );
         } else {
             throw new Exception(mysqli_error($db_connect));
@@ -90,7 +117,7 @@ function create($db_connect, $table, $data) {
             message: "Failed to create record: " . $e->getMessage()
         );
     }
-}
+ }
 
 function update($db_connect, $table, $id, $data) {
     try {

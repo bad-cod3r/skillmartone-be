@@ -5,11 +5,16 @@ function pagination($table, $db_connect, $params = []) {
     $sort = isset($params['sort']) ? mysqli_real_escape_string($db_connect, $params['sort']) : 'id';
     $order = isset($params['order']) ? strtoupper($params['order']) : 'DESC';
     $search = isset($params['search']) ? mysqli_real_escape_string($db_connect, $params['search']) : '';
-    
+    $searchableColumns = $params['searchableColumns'];
     $conditions = [];
     
     if (!empty($search)) {
-        $conditions[] = "(name LIKE '%$search%' OR description LIKE '%$search%')";
+        $searchConditions = [];
+        foreach ($searchableColumns as $column) {
+            $column = mysqli_real_escape_string($db_connect, $column);
+            $searchConditions[] = "$column LIKE '%$search%'";
+        }
+        $conditions[] = "(" . implode(' OR ', $searchConditions) . ")";
     }
     
     if (!empty($params['filter']) && is_array($params['filter'])) {

@@ -7,33 +7,25 @@ function getAllCategories($db_connect) {
     $jsonBody = file_get_contents('php://input');
     if (!empty($jsonBody)) {
         $requestData = json_decode($jsonBody, true);
-        
-        $page = isset($requestData['page']) ? filter_var($requestData['page'], FILTER_VALIDATE_INT) : 1;
-        $limit = isset($requestData['limit']) ? filter_var($requestData['limit'], FILTER_VALIDATE_INT) : 10;
-        
-        $params = [
-            'page' => $page ?: 1,
-            'limit' => $limit ?: 10,
-            'sort' => in_array($requestData['sort'] ?? '', ['id', 'name', 'created_at']) ? $requestData['sort'] : 'id',
-            'order' => in_array(strtoupper($requestData['order'] ?? ''), ['ASC', 'DESC']) ? strtoupper($requestData['order']) : 'DESC',
-            'search' => strip_tags($requestData['search'] ?? ''),
-            'filter' => array_filter($requestData['filter'] ?? [])
-        ];
     } else {
-        $params = [
-            'page' => $_GET['page'] ?? 1,
-            'limit' => $_GET['limit'] ?? 10,
-            'sort' => $_GET['sort'] ?? 'id',
-            'order' => $_GET['order'] ?? 'desc',
-            'search' => $_GET['search'] ?? '',
-            'filter' => [
-                'is_active' => $_GET['is_active'] ?? null
-            ]
-        ];
+        $requestData = $_GET;
     }
-    
-    $params['filter'] = array_filter($params['filter'] ?? []);
-    
+
+    $searchableColumns = [
+        'name',
+        'code',
+    ];
+
+    $params = [
+        'page' => filter_var($requestData['page'] ?? 1, FILTER_VALIDATE_INT) ?: 1,
+        'limit' => filter_var($requestData['limit'] ?? 10, FILTER_VALIDATE_INT) ?: 10,
+        'sort' => in_array($requestData['sort'] ?? '', ['id', 'name', 'created_at']) ? $requestData['sort'] : 'id',
+        'order' => in_array(strtoupper($requestData['order'] ?? ''), ['ASC', 'DESC']) ? strtoupper($requestData['order']) : 'DESC',
+        'search' => strip_tags($requestData['search'] ?? ''),
+        'searchableColumns' => $searchableColumns,
+        'filter' => array_filter($requestData['filter'] ?? [])
+    ];
+
     findAll($db_connect, 'category', $params);
 }
 
