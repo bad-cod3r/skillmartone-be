@@ -15,7 +15,7 @@ function findAll($db_connect, $table, $params = []) {
         while ($row = mysqli_fetch_assoc($result)) {
             if (isset($row['image']) && $row['image'] !== '') {
                 $row['image'] = $baseUrl . $row['image'];
-            } else {
+            } elseif(isset($row['image']) && $row['image'] === '') {
                 $row['image'] = NULL;
             }
             $records[] = $row;
@@ -50,7 +50,7 @@ function findAll($db_connect, $table, $params = []) {
             $baseUrl = generateBaseUrl();
             if (isset($record['image']) && $record['image'] !== '') {
                 $record['image'] = $baseUrl . $record['image'];
-            } else {
+            } elseif(isset($record['image']) && $record['image'] === '') {
                 $record['image'] = NULL;
             }
             
